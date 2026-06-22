@@ -13,11 +13,11 @@ const socketIoServer = new Server(server,{
 const ROOM = "globalChat";
 let users = [];
 socketIoServer.on("connection", (socketObj)=>{
-  console.log('user loggedIN ',socketObj.id);
+  let user = null;
 
   socketObj.on('joinRoom', async (userName)=>{
     console.log(`${userName} is joining the group..`);
-    
+    user = userName;
     await socketObj.join(ROOM);
     const isExist = users.find((user) => user === userName);
     if(!isExist) users.push(userName);
@@ -30,10 +30,7 @@ socketIoServer.on("connection", (socketObj)=>{
     console.log(users);
     
     //send to All
-    socketIoServer.to(ROOM).emit("newUser",
-      users,
-      msg,
-    );
+    socketIoServer.to(ROOM).emit("newUser", users, msg, );
 
     //BroadCast ( send to all except to whose connection is this)
     //socketObj.to(ROOM).emit("newUser", userName);
@@ -46,18 +43,36 @@ socketIoServer.on("connection", (socketObj)=>{
     //Send to All
     socketIoServer.to(ROOM).emit('msg', msg);
     console.log('Send to All');
-  })
+  });
 
   //Typing Indication
   socketObj.on('typing', (userName)=>{
   //Broadcast to others
     socketObj.to(ROOM).emit('typing', userName);
-  })
+  });
 
   //Stop Typing Indication
   socketObj.on('stopTyping', (userName)=>{
     //Broadcast to others
     socketObj.to(ROOM).emit('stopTyping', userName);
+  });
+
+  //Discconect
+  socketObj.on('disconnect',()=>{
+    if(user){
+      users = users.filter(u => u !== user)
+      socketObj.to(ROOM).emit('userLeft', {
+        msg: {
+          type : 'notify',
+          id : `${Date.now()}${Math.random()}`,
+          ts : Date(),
+          text : `${user} Left the chat`,
+        },
+        users: users,
+      });
+      console.log(user, 'left ');
+      
+    }
   })
 })
 

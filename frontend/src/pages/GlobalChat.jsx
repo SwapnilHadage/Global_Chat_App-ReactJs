@@ -80,11 +80,18 @@ function GlobalChat() {
       )
     })
 
+    //User left
+    userSocket.on('userLeft', ({msg, users})=>{
+      dispatch(addMessage(msg));
+      dispatch(newUser(users));
+      
+    })
   return () => {
     userSocket.off('newUser');
     userSocket.off('msg');
     userSocket.off('typing');
     userSocket.off('stopTyping');
+    userSocket.off('userLeft');
   };
   },[dispatch, ]);
   
