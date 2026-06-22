@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+/* ==================================================  LIGHT THEME (DEFAULT)  ================================================== */
+
+@theme {
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Layout */
+  --color-chat-page: #F8FAFC;
+  --color-chat-app: #EFF6FF;
+  --color-chat-surface: #FFFFFF;
+  --color-chat-surface-elevated: #F8FAFC;
+
+  /* Header */
+  --color-chat-header: #0F172A;
+  --color-chat-header-text: #FFFFFF;
+  --color-chat-header-online: #BFDBFE;
+
+  /* Brand */
+  --color-chat-primary: #2563EB;
+  --color-chat-primary-hover: #1D4ED8;
+  --color-chat-primary-active: #1E40AF;
+
+  /* Accent */
+  --color-chat-accent: #0D9488;
+  --color-chat-accent-soft: #CCFBF1;
+
+  /* Text */
+  --color-chat-text: #0F172A;
+  --color-chat-text-secondary: #334155;
+  --color-chat-text-muted: #64748B;
+  --color-chat-text-inverse: #FFFFFF;
+
+  /* Borders */
+  --color-chat-border: #CBD5E1;
+  --color-chat-border-strong: #94A3B8;
+  --color-chat-divider: #E2E8F0;
+
+  /* Inputs */
+  --color-chat-input: #FFFFFF;
+  --color-chat-input-text: #0F172A;
+  --color-chat-input-placeholder: #94A3B8;
+  --color-chat-input-focus: #2563EB;
+  --color-chat-input-ring: #BFDBFE;
+
+  /* Messages */
+  --color-chat-message-own: #2563EB;
+  --color-chat-message-own-text: #FFFFFF;
+  --color-chat-message-own-time: #DBEAFE;
+
+  --color-chat-message-other: #F1F5F9;
+  --color-chat-message-other-text: #0F172A;
+  --color-chat-message-other-time: #64748B;
+
+  /* Sender */
+  --color-chat-sender: #0D9488;
+
+  /* Typing */
+  --color-chat-typing: #0F766E;
+  --color-chat-typing-bg: #CCFBF1;
+  --color-chat-typing-dot: #14B8A6;
+
+  /* Status */
+  --color-chat-online: #22C55E;
+  --color-chat-away: #F59E0B;
+  --color-chat-offline: #94A3B8;
+  --color-chat-error: #DC2626;
+}
+
+/* ==================================================
+  DARK THEME Add class="dark" to html element 
+  ================================================== */
+
+@layer theme {
+  .dark {
+    --color-chat-page: #020617;
+    --color-chat-app: #0F172A;
+    --color-chat-surface: #111827;
+    --color-chat-surface-elevated: #1E293B;
+
+    --color-chat-header: #020617;
+    --color-chat-header-text: #F8FAFC;
+    --color-chat-header-online: #93C5FD;
+
+    --color-chat-primary: #3B82F6;
+    --color-chat-primary-hover: #60A5FA;
+    --color-chat-primary-active: #2563EB;
+
+    --color-chat-accent: #14B8A6;
+    --color-chat-accent-soft: #134E4A;
+
+    --color-chat-text: #F8FAFC;
+    --color-chat-text-secondary: #CBD5E1;
+    --color-chat-text-muted: #94A3B8;
+    --color-chat-text-inverse: #FFFFFF;
+
+    --color-chat-border: #334155;
+    --color-chat-border-strong: #475569;
+    --color-chat-divider: #1E293B;
+
+    --color-chat-input: #0F172A;
+    --color-chat-input-text: #F8FAFC;
+    --color-chat-input-placeholder: #64748B;
+    --color-chat-input-focus: #60A5FA;
+    --color-chat-input-ring: #1D4ED8;
+
+    --color-chat-message-own: #2563EB;
+    --color-chat-message-own-text: #FFFFFF;
+    --color-chat-message-own-time: #BFDBFE;
+
+    --color-chat-message-other: #1E293B;
+    --color-chat-message-other-text: #F8FAFC;
+    --color-chat-message-other-time: #94A3B8;
+
+    --color-chat-sender: #2DD4BF;
+
+    --color-chat-typing: #2DD4BF;
+    --color-chat-typing-bg: #134E4A;
+    --color-chat-typing-dot: #2DD4BF;
+
+    --color-chat-online: #4ADE80;
+    --color-chat-away: #FBBF24;
+    --color-chat-offline: #64748B;
+    --color-chat-error: #F87171;
+  }
+}
+
+@layer utilities {
+  .scrollbar-chat {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-chat-border-strong) var(--color-chat-surface);
+  }
+
+  .scrollbar-chat::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-chat::-webkit-scrollbar-track {
+    background: var(--color-chat-surface);
+  }
+
+  .scrollbar-chat::-webkit-scrollbar-thumb {
+    background: var(--color-chat-border-strong);
+    border-radius: 999px;
+    border: 2px solid var(--color-chat-surface);
+  }
+
+  .scrollbar-chat::-webkit-scrollbar-thumb:hover {
+    background: var(--color-chat-text-muted);
+  }
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
