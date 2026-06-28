@@ -1,11 +1,18 @@
 import {useState, useEffect, } from 'react';
 import { useSelector, useDispatch, } from 'react-redux';
-import { changeTheme, clearMessages} from '../redux/slice';
-import { FaAngleDown, FaAngleUp, MdDeleteForever, GrLogout, MdLightMode, MdDarkMode } from '../assets/reactIcons'
+import { changeTheme, clearMessages, reset, } from '../redux/slice';
+import { FaAngleDown, FaAngleUp, MdDeleteForever, GrLogout, MdLightMode, MdDarkMode } from '../assets/reactIcons';
+import { userSocket } from '../../socket/webSocket';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
+import { AiOutlineRollback, RiSettingsLine } from '../utils';
+
 
 function MoreInfo({onClose}) {
   const { userName='', messages=[], users=[], theme,  } = useSelector(state=>state.chatApp);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [viewUsers, setViewUsers] = useState(false);
   const handleUsersView = ()=> setViewUsers((prev)=> !prev);
@@ -14,19 +21,57 @@ function MoreInfo({onClose}) {
   const handleViewSettings = ()=> setViewSettings((prev)=> !prev);
 
   const handleTheme= ()=> dispatch(changeTheme());
-  const handleClearChat= ()=> dispatch(clearMessages());
-  const handleLeaveChat= ()=> {};
+  const handleClearChat= async()=> {
+    const res = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You want to Clear Chat?',
+      icon: 'question',
+      cancelButtonText: 'No',
+      confirmButtonText: 'Clear',
+      showCancelButton: true,
+      showConfirmButton: true,
+
+    });
+
+    if(res.isConfirmed){
+      dispatch(clearMessages());
+      toast.success("Cleared messages successfully!")
+    }
+
+    return
+  };
+  const handleLeaveChat= async()=> {
+    const res = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You want to leave the chat?',
+      icon: 'question',
+      cancelButtonText: 'Cancel',
+      confirmButtonText: 'Leave Chat',
+      showCancelButton: true,
+      showConfirmButton: true,
+    });
+
+    if(res.isConfirmed){
+      userSocket.emit('leaveChat');
+      dispatch(reset());
+      navigate('/login');
+    }
+
+    return
+  };
 
   return (
     <div className={`${theme?' dark ': ''}  w-dvw h-dvh  bg-transparent absolute flex justify-end`}
     >
       {/* Transparent div */}
       <div className={`flex-1 bg-black/50 relative`}
+      aria-label='Close Sidebar'
       onClick={onClose}>
         <button
-          className={`absolute p-2 top-5 right-[-15px] rounded-2xl z-20 bg-chat-primary text-chat-text-inverse hover:bg-chat-primary-hover active:bg-chat-primary-active p-2 transition-colors duration-200`}
+          aria-label='Close Sidebar'
+          className={`absolute p-2 top-5 right-[-15px] rounded-2xl z-20 bg-chat-primary text-chat-text-inverse hover:bg-chat-primary-hover active:bg-chat-primary-active p-3 transition-colors duration-200`}
           onClick={onClose}>
-            Back
+            <AiOutlineRollback/>
         </button>
       </div>
 
@@ -50,12 +95,11 @@ function MoreInfo({onClose}) {
           <div className={`flex flex-col w-full cursor-pointer`}>
             <div className={`flex items-center gap-2`}
             onClick={handleUsersView}>
-              <div className={`size-[5px] rounded bg-green-500 shadow-lg shadow-green-500`}>
-
-              </div>
               <p>
                 Online ({users.length})
               </p>
+              <div className={`size-[5px] rounded bg-green-500 shadow-lg shadow-green-500`}>
+              </div>
               {
                 !viewUsers ? <FaAngleUp/> : <FaAngleDown/>
               }
@@ -63,9 +107,12 @@ function MoreInfo({onClose}) {
             {
               viewUsers &&
               <ul>
+                <li className={`px-3 text-chat-text-secondary`}
+                key={'you'}>You</li>
               {
-                users && users.map((user, i)=>(
-                  <li className={`px-3 text-chat-text-secondary`}>{user}</li>
+                users.length && users.map((user, i)=>(
+                  <li className={`px-3 text-chat-text-secondary`}
+                  key={user}>{user}</li>
                 ))
               }
             </ul>
@@ -78,6 +125,7 @@ function MoreInfo({onClose}) {
               <p>
                 Settings
               </p>
+              <RiSettingsLine />
               {
                 !viewSettings ? <FaAngleUp/> : <FaAngleDown/>
               }
@@ -87,6 +135,7 @@ function MoreInfo({onClose}) {
               <ul className={`px-3 `}>
                 <li>
                   <button onClick={handleTheme}
+                  aria-label='Change Theme'
                   className={`flex items-center gap-2`}>
                     <p>Theme</p>
                     <div>
@@ -98,6 +147,7 @@ function MoreInfo({onClose}) {
                 </li>
                 <li>
                   <button onClick={handleClearChat} 
+                  aria-label='Clear Chats'
                   className={`flex items-center gap-2`}>
                     <p>Clear Chat</p>
                     <MdDeleteForever/>
@@ -105,6 +155,7 @@ function MoreInfo({onClose}) {
                 </li>
                 <li>
                   <button onClick={handleLeaveChat}
+                  aria-label='Leave Global-Chat'
                   className={`flex items-center gap-2`}>
                     <p>Leave Chat</p>
                     <GrLogout/>
