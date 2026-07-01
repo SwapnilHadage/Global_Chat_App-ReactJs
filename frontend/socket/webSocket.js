@@ -1,8 +1,11 @@
 import { io } from 'socket.io-client';
 import Swal from "sweetalert2";
 import toast from 'react-hot-toast';
+
+console.log(import.meta.env.VITE_SERVER_URL);
+
 export const userSocket = io(
-    'http://localhost:4600', {
+    import.meta.env.VITE_SERVER_URL, {
       autoConnect : false,
       reconnection : true,
       reconnectionAttempts : 5,

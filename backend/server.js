@@ -1,14 +1,32 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { createServer, } from 'node:http';
 import express from 'express';
 import { Server } from "socket.io";
 import { validateUsername } from "./utils/validateUsername.js";
+import cors from "cors";
+
+
+const PORT = process.env.PORT || 4600;
+const CLIENT_URL = process.env.CLIENT_URL;
+const NODE_ENV = process.env.NODE_ENV || "development";
 
 const app = express();
+
+app.use(cors({
+  origin: CLIENT_URL,
+  credentials: true,
+}));
+
+
 const server = createServer(app); // equivalent to app.listen()
 const socketIoServer = new Server(server,{
-  cors:{
-    origin: '*',
-  }
+  cors: {
+    origin: CLIENT_URL,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 }) //Passing http server to socket
 
 const ROOM = "globalChat";
@@ -97,7 +115,7 @@ socketIoServer.on("connection", (socketObj)=>{
     //Send to All
     if(
       msg.sender === user &&
-      users.includes(msg.sender.trim().toLowerCase()) &&
+      users.includes(msg.sender.trim()) &&
       typeof msg.text==='string' &&
       msg.text.trim() &&
       msg.text.trim().length <= msgCharsLimit &&
@@ -146,6 +164,6 @@ app.get('/', (req, res)=>{
 });
 
 
-server.listen(4600, ()=>{
-  console.log("Server Running at http://localhost:4600");
+server.listen(PORT, ()=>{
+  console.log(`Server Running ${PORT}`);
 });
