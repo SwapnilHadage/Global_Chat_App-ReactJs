@@ -1,7 +1,7 @@
 import { createServer, } from 'node:http';
 import express from 'express';
 import { Server } from "socket.io";
-import { validateUsername } from '../frontend/src/utils';
+import { validateUsername } from "./utils/validateUsername.js";
 
 const app = express();
 const server = createServer(app); // equivalent to app.listen()
@@ -17,52 +17,77 @@ const msgCharsLimit = 500; //Max 500 character's msg text allowed
 
 socketIoServer.on("connection", (socketObj)=>{
   let user = null;
+  let hasLeft = false;
   console.log('New User Connected');
+
+  const handleUserLeave = ()=>{
+    if(!user || hasLeft) return;
+
+    hasLeft = true;
+    users = users.filter(u => u !== user);
+
+    socketObj.leave(ROOM);
+    socketObj.to(ROOM).emit('userLeft', {
+      msg: {
+        sender : 'server',
+        type : 'notify',
+        id : `${Date.now()}${Math.random()}${crypto.randomUUID}`,
+        ts : Date.now(),
+        text : `${user} Left the chat`,
+      },
+      user: user,
+    });
+
+    console.log(user, 'left ');
+  };
   
-  socketObj.on('checkUserName', (userName)=>{
-    const res = validateUsername(userName);
-
-    const isOk = !users.find((user) => user===userName.toLowerCase() ) && res.valid;
-    socketObj.emit('checkUserName', isOk);
-  });
-
-
   socketObj.on('joinRoom', async (userName, callback=null)=>{
-    if(!userName || !userName.trim()){
+    const res = validateUsername(userName);
+    const normalized = String(userName).toLowerCase();
+    const isAvailable = !users.find((user) => user.toLowerCase() === normalized);
+    if(!res.valid){
       callback?.({
         success: false,
-        message: "Invalid username",
+        message: "Invalid Username",
+      });
+      return;
+    }
+    if(!isAvailable){
+      callback?.({
+        success: false,
+        message: "Username Unavailable",
       });
       return;
     }
 
     console.log(`${userName} is joining the group..`);
-
-    user = userName.toLowerCase();
+    user = userName; // keep original casing for display
+    hasLeft = false;
     await socketObj.join(ROOM);
-    const isExist = users.find((user) => user === userName);
-    if(!isExist) users.push(userName.toLowerCase());
+    const isExist = users.find((user) => user.toLowerCase() === normalized);
+    if(!isExist) users.push(userName);
 
     const msg = {
+        sender: 'server',
         type : 'notify',
-        id : `${Date.now()}${Math.random()}`,
+        id : `${Date.now()}${Math.random()}${crypto.randomUUID}`,
         ts : Date.now(),
         text : `joined the chat`,
         user : user,
       }
     console.log(users);
     
-    //send to All
-    socketIoServer.to(ROOM).emit("roomJoinedSuccess", users, msg );
-
-    //BroadCast ( send to all except to whose connection is this)
-    socketObj.to(ROOM).emit("newUser", userName, msg );
-
+    // Acknowledge the joining socket first so it reliably receives the users/msg
     if(callback){
       callback({
-        success: true
+        success: true,
+        users: users,
+        msg: msg
       })
     }
+
+    // Broadcast to others (send to all except the joining socket)
+    socketObj.to(ROOM).emit("newUser", userName, msg );
   });
 
   //Msg
@@ -74,13 +99,20 @@ socketIoServer.on("connection", (socketObj)=>{
       msg.sender === user &&
       typeof msg.text==='string' &&
       msg.text.trim() &&
-      msg.text.length < msgCharsLimit &&
+      msg.text.trim().length <= msgCharsLimit &&
       msg.type==='msg' &&
       msg.ts &&
       msg.id
     ){
-      socketIoServer.to(ROOM).emit('msg', msg);
+      socketIoServer.to(ROOM).emit('msg', {
+        ...msg,
+        ts : Date.now(),
+        sender: user,
+      });
       console.log('Send to All');
+    }else{
+      console.log('Failed to send');
+      
     }
   });
 
@@ -98,11 +130,11 @@ socketIoServer.on("connection", (socketObj)=>{
 
   //Discconect
   socketObj.on('disconnect',()=>{
-    handleUserLeave(socketObj, user);
+    handleUserLeave();
   })
 
   socketObj.on('leaveChat',()=>{
-    handleUserLeave(socketObj, user);
+    handleUserLeave();
   })
 })
 
@@ -114,21 +146,3 @@ app.get('/', (req, res)=>{
 server.listen(4600, ()=>{
   console.log("Server Running at http://localhost:4600");
 });
-
-function handleUserLeave(socketObj, user){
-  if(user){
-    users = users.filter(u => u !== user);
-
-    socketObj.to(ROOM).emit('userLeft', {
-      msg: {
-        type : 'notify',
-        id : `${Date.now()}${Math.random()}`,
-        ts : Date(),
-        text : `${user} Left the chat`,
-      },
-      user: user,
-    });
-
-    console.log(user, 'left ');
-  }
-}

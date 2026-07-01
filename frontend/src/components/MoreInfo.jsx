@@ -53,6 +53,7 @@ function MoreInfo({onClose}) {
 
     if(res.isConfirmed){
       userSocket.emit('leaveChat');
+      userSocket.disconnect();
       dispatch(reset());
       navigate('/login');
     }
@@ -70,7 +71,10 @@ function MoreInfo({onClose}) {
         <button
           aria-label='Close Sidebar'
           className={`absolute p-2 top-5 right-[-15px] rounded-2xl z-20 bg-chat-primary text-chat-text-inverse hover:bg-chat-primary-hover active:bg-chat-primary-active p-3 transition-colors duration-200`}
-          onClick={onClose}>
+          onClick={(e)=>{
+            e.stopPropagation();
+            onClose();
+          }}>
             <AiOutlineRollback/>
         </button>
       </div>
@@ -96,7 +100,7 @@ function MoreInfo({onClose}) {
             <div className={`flex items-center gap-2`}
             onClick={handleUsersView}>
               <p>
-                Online ({users.length})
+                Online ({users.length + 1})
               </p>
               <div className={`size-[5px] rounded bg-green-500 shadow-lg shadow-green-500`}>
               </div>
@@ -108,9 +112,9 @@ function MoreInfo({onClose}) {
               viewUsers &&
               <ul>
                 <li className={`px-3 text-chat-text-secondary`}
-                key={'you'}>You</li>
+                key={'you'}>{userName} (You)</li>
               {
-                users.length && users.map((user, i)=>(
+                users.length>0 && users.map((user, i)=>(
                   <li className={`px-3 text-chat-text-secondary`}
                   key={user}>{user}</li>
                 ))

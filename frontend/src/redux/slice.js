@@ -16,18 +16,19 @@ const reducer = createSlice({
       state.theme = !state.theme
     },
     addMessage : (state, action)=>{
-      state.messages = [...state.messages, action.payload];
+      state.messages.push(action.payload);
     },
     setUsers : (state, action)=>{
       
-      state.users = action.payload.filter(user=>user!==this.state.userName);
+      state.users = action.payload.filter(user=>user!==state.userName);
     },
     newUser : (state, action)=>{
       const users = state.users;
       if(state.userName !== action.payload
         &&
-        !users.includes(action.payload)){
-        state.users = [...users, action.payload];
+        !users.includes(action.payload)
+        ){
+        state.users.push(action.payload);
       }
     },
     clearMessages : (state)=>{

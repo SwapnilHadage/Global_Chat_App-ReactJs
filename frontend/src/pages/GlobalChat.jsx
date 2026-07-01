@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect,  } from 'react'
 import { userSocket } from '../../socket/webSocket';
-import { addMessage, newUser, userLeft, } from '../redux/slice';
+import { addMessage, newUser, userLeft, setUsers, addUser } from '../redux/slice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
-import MoreInfo from '../components/MoreInfo';
+import {MoreInfo, } from '../components';
 import toast from 'react-hot-toast';
 import { IoSendSharp } from '../utils';
+import Swal from "sweetalert2";
 
 
 function GlobalChat() {
@@ -14,29 +15,45 @@ function GlobalChat() {
   const { userName='', messages=[], users=[], theme,  } = useSelector(state=>state.chatApp);
 
   const [isConnected, setIsConnected] = useState(userSocket.connected);
-  const hasConnectedBefore = useRef(false)
-  useEffect(()=>{  //Connection and
+  // const hasConnectedBefore = useRef()
+  useEffect(()=>{  //Connection and reconnection
     
     const handleConnect = ()=>{
-      if(!hasConnectedBefore.current){
-        toast.success('Connected');
-        hasConnectedBefore.current = true;
-      }else{
+      // if(!hasConnectedBefore.current){
+      //   toast.success('Connected');
+      //   hasConnectedBefore.current = true;
+      // }else{
         if(userName){
-          userSocket.emit('joinRoom', userName);
-          toast.success('Reconnected');
+          // Re-join the room and request server ack so we receive the users list and join msg
+          userSocket.timeout(5000).emit('joinRoom', userName, (err, response)=>{
+            if(err){
+              console.error('Rejoin timed out or failed', err);
+              toast.error('Rejoin failed', { id: "connection" });
+              return;
+            }
+            if(!response?.success){
+              toast.error(response?.message || 'Rejoin rejected', { id: "connection" });
+              navigate('/login');
+              return;
+            }
+            const { users: srvUsers = [], msg = {} } = response;
+            dispatch(setUsers(srvUsers));
+            if(msg && (msg.text || msg.type)){
+              dispatch(addMessage({ ...msg, text: `You ${msg.text ?? ''}`.trim() }));
+            }
+            toast.success('Reconnected', { id: "re-connection" });
+            setIsConnected(true);
+          });
         }else{
-          toast.error('Username unavailable to reconnect. Please Login again!')
+          toast.error('Username unavailable to reconnect. Please Login again!', { id: "connection" });
           navigate('/login');
         }
-        
-      }
-      setIsConnected(true);
+      //}
     };
 
     const handleDisconnect = (reason)=>{
       if(reason !== 'io client disconnect'){
-        toast.error('Disconnected, Trying to reconnect');
+        toast.loading('Disconnected, Trying to reconnect', { id: "connection" });
         setIsConnected(false);
       }else{
         toast.success('Logged-Out');
@@ -46,9 +63,30 @@ function GlobalChat() {
     };
 
     const handleConnectError = () => {
-      toast.error("Server unavailable");
+      toast.dismiss("connection")
+      toast.loading("Server unavailable", { id: "re-connection" });
     };
 
+    const handleReconnectAttemptsDone = async() => {
+      toast.dismiss("re-connection");
+      toast.dismiss("connection");
+      const res = await Swal.fire({
+        title: 'Unable to reconnect!',
+        text: 'Please try again later!',
+        icon: 'question',
+        confirmButtonText: 'Retry',
+        showConfirmButton: true,
+      });
+      
+      if(res.isConfirmed){
+        userSocket.connect();
+      }
+      
+      return
+    }
+
+    //Last Reconnect attempt failed
+    userSocket.io.on("reconnect_failed", handleReconnectAttemptsDone);
     userSocket.on('connect', handleConnect);
     userSocket.on('disconnect', handleDisconnect);
     userSocket.on('connect_error', handleConnectError);
@@ -58,7 +96,7 @@ function GlobalChat() {
       userSocket.off('disconnect', handleDisconnect);
       userSocket.off('connect_error', handleConnectError);
     };
-  }, []);
+  }, [userName, dispatch, navigate]);
 
   useEffect(()=>{
     if (userName === '' || !userName) {
@@ -89,9 +127,9 @@ function GlobalChat() {
     }
       
     userSocket.emit('ChatMessage', {
-      type: 'msg',
-      id : `${Date.now()}${userName}`,
       sender : userName,
+      type: 'msg',
+      id : `${Date.now()}${userName}${crypto.randomUUID()}`,
       ts : Date.now(),
       text : msg,
       });
@@ -105,22 +143,18 @@ function GlobalChat() {
   useEffect(()=>{   //Socket_IO events
     //New User Joined Chat event
     userSocket.on('newUser', (user, msg)=>{
-      console.log(user);
-      
-      dispatch(newUser(user));
-      dispatch(addMessage({
+      if(msg.sender === 'server'){
+        dispatch(newUser(user));
+        dispatch(addMessage({
         ...msg,
-        text : `${msg.user} ${msg.text}`,
+        text : `${msg.user ?? ''} ${msg.text ?? ''}`.trim(),
       }));
-      console.log(messages);
-      
+      }
     })
 
     // message event
     userSocket.on('msg', (msg)=>{
       dispatch(addMessage(msg));
-      console.log('msg recieved');
-      
     });
 
     //typing event
@@ -145,13 +179,16 @@ function GlobalChat() {
 
     //User left
     userSocket.on('userLeft', (payload)=>{
-      dispatch(addMessage(payload.msg));
-      dispatch(userLeft(payload.user));
-      console.log(payload.msg);
-      console.log(payload.user);
+      if(payload.msg.sender === 'server'){
+        dispatch(addMessage(payload.msg));
+        dispatch(userLeft(payload.user));
+      }else{
+        console.log('Unauthorized notification');
+      }
       
       
     })
+
   return () => {
     userSocket.off('newUser');
     userSocket.off('msg');
@@ -161,6 +198,7 @@ function GlobalChat() {
   };
   },[dispatch, userName ]);
   
+  const typingIndicationLimiter = useRef(true); //To provide 1.5s gap between two typing indications
   useEffect(()=>{ //DeBouncing ( Typing Indication )
     if(!isConnected) return;
 
@@ -170,13 +208,26 @@ function GlobalChat() {
     };
 
     if(msg){
-      userSocket.emit('typing', userName);
-      if(typingTimer.current) clearTimeout(typingTimer.current);
+      if(typingTimer.current){
+        clearTimeout(typingTimer.current);
+        typingTimer.current = null;
+      }
+      if(typingTimer.current === null){
+        typingTimer.current = setTimeout(()=>{
+          userSocket.emit('stopTyping', userName);
+        }, 1500);
+      }
+      if(typingIndicationLimiter.current){
+        userSocket.emit('typing', userName);
+        typingIndicationLimiter.current = false;
+        
+        setTimeout(()=>{
+          typingIndicationLimiter.current = true;
+        }, 1500);
+      }else{
+        return;
+      }
     }
-
-    typingTimer.current = setTimeout(()=>{
-      userSocket.emit('stopTyping', userName);
-    }, 1500);
 
     return ()=>{
       if(typingTimer.current){
@@ -185,9 +236,18 @@ function GlobalChat() {
     };
   },[msg, userName, ])
   
+  const showToast = useRef(true);
   const handleTypingMsg = (e)=>{
-    if(msg.length >= msgCharsLimit){
-      toast.error('You Reached maximum character limit!');
+    setMsg(e.target.value.slice(0, msgCharsLimit));
+
+    if(e.target.value.length >= msgCharsLimit){
+      if(showToast.current){
+        toast.error('You Reached maximum character limit!');
+        showToast.current= false;
+        setTimeout(()=>{
+          showToast.current = true;
+        }, 5000);
+      }
     }else{
       setMsg(e.target.value);
       resizeTextarea(e.target);
@@ -231,7 +291,7 @@ function GlobalChat() {
 
       {/* Messages */}
       <main
-      className={`flex-1 py-2 px-2 gap-2 overflow-y-auto overflow-x-hidden bg-chat-surface scrollbar-chat flex flex-col justify-end ` }>
+      className={`flex-1 p-2 gap-2 overflow-y-auto overflow-x-hidden bg-chat-surface scrollbar-chat flex flex-col min-h-0 ` }>
         <div className='flex flex-col gap-2'>
             {
               messages.length &&
@@ -242,7 +302,7 @@ function GlobalChat() {
                   ${msg.sender==userName ?
                     'ml-auto bg-chat-message-own text-chat-message-own-text justify-end':
                     'mr-auto bg-chat-message-other text-chat-message-other-text justify-start' }`}
-                  key={msg.id}>
+                  key={msg.id ?? `msg-${i}`}>
                   { msg.sender!==userName &&
                     <div className={`text-xs text-chat-sender`}>
                       {msg.sender}
@@ -260,7 +320,7 @@ function GlobalChat() {
                 </div> ) :(
                   <div
                   className={`  rounded-xl overflow-hidden flex flex-col items-center justify-center gap-0 w-full px-4 py-1 `}
-                  key={msg.id}>
+                  key={msg.id ?? `notify-${i}`}>
 
                   <p className='text-xs break-words px-2 py-1 bg-chat-surface-elevated rounded-xl'>
                     {msg.text}
