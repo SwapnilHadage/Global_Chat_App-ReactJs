@@ -5,7 +5,7 @@ export const userSocket = io(
     'http://localhost:4600', {
       autoConnect : false,
       reconnection : true,
-      reconnectionAttempts : 1,
+      reconnectionAttempts : 5,
       reconnectionDelay : 1000,
       
     });
