@@ -62,7 +62,7 @@ function MoreInfo({onClose}) {
   };
 
   return (
-    <div className={`${theme?' dark ': ''}  w-dvw h-dvh  bg-transparent absolute flex justify-end`}
+    <div className={`${theme?' dark ': ''}   w-dvw h-dvh  bg-transparent absolute flex justify-end`}
     >
       {/* Transparent div */}
       <div className={`flex-1 bg-black/50 relative`}

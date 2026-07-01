@@ -1,5 +1,6 @@
 const USERNAME_REGEX =
-    /^(?=.{3,20}$)(?!.*[_-]{2})[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)*$/;
+/^(?=.{3,20}$)[A-Za-z0-9](?:[A-Za-z0-9]|[._-](?=[A-Za-z0-9]))*$/;
+
 const reserved = new Set([
         "admin",
         "administrator",
@@ -22,7 +23,7 @@ export function validateUsername(username){
     return {
       valid: false,
       message:
-        "Username must be 3-20 characters and contain only letters, numbers, _, -, or .",
+        "Username must be 3–20 characters, start with a letter or number, and use only letters, numbers, ., _, or -. Special characters can't be consecutive or appear at the end.",
       };
   }
   if(reserved.has(username.toLowerCase())){

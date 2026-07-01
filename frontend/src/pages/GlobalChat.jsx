@@ -95,6 +95,7 @@ function GlobalChat() {
       userSocket.off('connect', handleConnect);
       userSocket.off('disconnect', handleDisconnect);
       userSocket.off('connect_error', handleConnectError);
+      userSocket.io.off("reconnect_failed", handleReconnectAttemptsDone);
     };
   }, [userName, dispatch, navigate]);
 
@@ -248,10 +249,10 @@ function GlobalChat() {
           showToast.current = true;
         }, 5000);
       }
-    }else{
-      setMsg(e.target.value);
-      resizeTextarea(e.target);
     }
+
+    resizeTextarea(e.target);
+    
   }
 
   const bottomRef = useRef(null);
@@ -270,7 +271,7 @@ function GlobalChat() {
     <div
     className={`${theme?' dark ': ''} bg-chat-page w-dvw h-dvh flex flex-col font-sans text-chat-text`}>
       <header
-      className={`bg-chat-header flex flex-col justify-start px-5 py-4`}
+      className={`${sideBarView==='more-info' ? 'filter blur-[2px]' : ''}  bg-chat-header flex flex-col justify-start px-5 py-4`}
       onClick={openMoreInfo}>
         <div className={`text-chat-header-text font-bold text-2xl `}>
           Global Chat
@@ -291,7 +292,7 @@ function GlobalChat() {
 
       {/* Messages */}
       <main
-      className={`flex-1 p-2 gap-2 overflow-y-auto overflow-x-hidden bg-chat-surface scrollbar-chat flex flex-col min-h-0 ` }>
+      className={`${sideBarView==='more-info' ? 'filter blur-[2px]' : ''}  flex-1 p-2 gap-2 overflow-y-auto overflow-x-hidden bg-chat-surface scrollbar-chat flex flex-col min-h-0 ` }>
         <div className='flex flex-col gap-2'>
             {
               messages.length &&
@@ -353,8 +354,9 @@ function GlobalChat() {
 
       {/* Msg Input Field */}
       <div
-      className={`flex items-center shrink-0 bg-chat-surface overflow-hidden gap-2 px-3 py-2 border-t border-chat-divider `}>
+      className={`${sideBarView==='more-info' ? 'filter blur-[2px]' : ''}  flex items-center shrink-0 bg-chat-surface overflow-hidden gap-2 px-3 py-2 border-t border-chat-divider `}>
           <textarea
+          disabled = {!isConnected}
           aria-label='Type Your Message Here'
           ref={textareaRef}
           rows={1}

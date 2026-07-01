@@ -31,7 +31,7 @@ socketIoServer.on("connection", (socketObj)=>{
       msg: {
         sender : 'server',
         type : 'notify',
-        id : `${Date.now()}${Math.random()}${crypto.randomUUID}`,
+        id : `${Date.now()}${Math.random()}${crypto.randomUUID()}`,
         ts : Date.now(),
         text : `${user} Left the chat`,
       },
@@ -70,7 +70,7 @@ socketIoServer.on("connection", (socketObj)=>{
     const msg = {
         sender: 'server',
         type : 'notify',
-        id : `${Date.now()}${Math.random()}${crypto.randomUUID}`,
+        id : `${Date.now()}${Math.random()}${crypto.randomUUID()}`,
         ts : Date.now(),
         text : `joined the chat`,
         user : user,
@@ -97,6 +97,7 @@ socketIoServer.on("connection", (socketObj)=>{
     //Send to All
     if(
       msg.sender === user &&
+      users.includes(msg.sender.trim().toLowerCase()) &&
       typeof msg.text==='string' &&
       msg.text.trim() &&
       msg.text.trim().length <= msgCharsLimit &&
@@ -105,9 +106,11 @@ socketIoServer.on("connection", (socketObj)=>{
       msg.id
     ){
       socketIoServer.to(ROOM).emit('msg', {
-        ...msg,
+        id : `${user}${Date.now()}${crypto.randomUUID()}`,
         ts : Date.now(),
-        sender: user,
+        sender : user,
+        text : msg.text.trim(),
+        type : "msg",
       });
       console.log('Send to All');
     }else{

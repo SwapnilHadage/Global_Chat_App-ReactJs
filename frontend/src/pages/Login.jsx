@@ -51,7 +51,7 @@ function Login() {
     }
     const res = validateUsername(userName.trim());
     if( !res.valid ){
-      toast.loading(res.message, { id: "connection" });
+      toast.error(res.message, { id: "connection" });
       return;
     }
 
@@ -109,7 +109,7 @@ function Login() {
       >Login
       </header>
 
-      <main className={`flex-1 flex justify-center items-center m-0`}>
+      <main className={`flex-1 flex justify-center items-center m-0 p-2`}>
           <div className={`flex flex-col gap-6 items-center p-10 rounded-xl bg-chat-surface-elevated border border-chat-border shadow-lg max-w-md`}>
             <input type="text" placeholder='Enter Username'
             className={`text-chat-input-text bg-chat-input border border-chat-border placeholder:text-chat-input-placeholder focus:outline-none focus:ring-2 focus:ring-chat-input-ring  focus:border-chat-primary py-4 px-5 text-xl w-full rounded-xl outline-none`}
