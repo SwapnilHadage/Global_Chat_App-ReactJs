@@ -1,0 +1,43 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 512 512"
+  fill="none"
+>
+  <style>
+    path {
+      stroke: #1D4ED8;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      path {
+        stroke: #60A5FA;
+      }
+    }
+  </style>
+
+  <title>Global Chat</title>
+
+  <path
+    d="M232 128 A128 128 0 0 0 232 384"
+    stroke-width="33"
+    stroke-linecap="butt"
+  />
+
+  <path
+    d="M232 128 L232 384"
+    stroke-width="32"
+    stroke-linecap="square"
+  />
+
+  <path
+    d="M280 384 A128 128 0 0 0 280 128"
+    stroke-width="33"
+    stroke-linecap="butt"
+  />
+
+  <path
+    d="M280 128 L280 384"
+    stroke-width="32"
+    stroke-linecap="square"
+  />
+</svg>

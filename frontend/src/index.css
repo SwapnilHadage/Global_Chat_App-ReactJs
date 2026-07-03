@@ -66,6 +66,12 @@
   --color-chat-away: #F59E0B;
   --color-chat-offline: #94A3B8;
   --color-chat-error: #DC2626;
+
+  /* Brand identity */
+  --color-brand-primary: #2563EB;
+  --color-brand-on-dark: #FFFFFF;
+  --color-brand-on-dark-accent: #60A5FA;
+  --color-brand-mark: var(--color-brand-primary);
 }
 
 /* ==================================================
@@ -74,6 +80,8 @@
 
 @layer theme {
   .dark {
+    --color-brand-mark: var(--color-brand-on-dark-accent);
+
     --color-chat-page: #020617;
     --color-chat-app: #0F172A;
     --color-chat-surface: #111827;

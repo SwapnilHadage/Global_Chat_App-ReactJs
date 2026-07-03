@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import { AiOutlineRollback, RiSettingsLine } from '../utils';
+import {Logo, } from './'
 
 
 function MoreInfo({onClose}) {
@@ -83,10 +84,14 @@ function MoreInfo({onClose}) {
       >
 
         <nav className={`bg-chat-header  text-chat-header-text font-bold text-2xl border-b border-b-chat-divider`}>
-          <div className={`px-7 py-4`}>
-            <h1>
-              GlobalChat
-            </h1>
+          <div className={`px-7 py-4 flex items-center gap-1`}>
+            <Logo
+            title="Global Chat"
+            className="h-10 w-10 text-brand-mark"
+            />
+            <p>
+              Global Chat
+            </p>
           </div>
         </nav>
 

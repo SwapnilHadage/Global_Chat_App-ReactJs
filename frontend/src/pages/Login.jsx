@@ -5,6 +5,7 @@ import { addUser, newUser, addMessage, setUsers  } from '../redux/slice'
 import { userSocket } from '../../socket/webSocket';
 import toast from 'react-hot-toast';
 import { validateUsername } from '../utils';
+import { Logo, } from "../components"
 
 
 function Login() {
@@ -105,11 +106,18 @@ function Login() {
   return (
     <div className={`h-dvh w-dvw font-sans ${theme?' dark ':''} bg-chat-page flex flex-col justify-center items-center `}>
 
-      <header className={`w-full  flex justify-start text-2xl font-bold border-b border-chat-border  items-center px-6 py-4 bg-chat-header text-chat-header-text `  }
-      >Login
+      <header className={`w-full  flex gap-1 justify-start text-2xl font-bold border-b border-chat-border  items-center px-1 py-4 bg-chat-header text-chat-header-text shrink-0 `  }
+      >
+        <Logo
+          title="Global Chat"
+          className="h-10 w-10 text-brand-mark"
+        />
+        <p>
+          Login
+        </p>
       </header>
 
-      <main className={`flex-1 flex justify-center items-center m-0 p-2`}>
+      <main className="flex-1 min-h-0 w-full overflow-y-auto flex justify-center items-center p-2">
           <div className={`flex flex-col gap-6 items-center p-10 rounded-xl bg-chat-surface-elevated border border-chat-border shadow-lg max-w-md`}>
             <input type="text" placeholder='Enter Username'
             className={`text-chat-input-text bg-chat-input border border-chat-border placeholder:text-chat-input-placeholder focus:outline-none focus:ring-2 focus:ring-chat-input-ring  focus:border-chat-primary py-4 px-5 text-xl w-full rounded-xl outline-none`}

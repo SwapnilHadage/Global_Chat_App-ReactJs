@@ -3,7 +3,7 @@ import { userSocket } from '../../socket/webSocket';
 import { addMessage, newUser, userLeft, setUsers, addUser } from '../redux/slice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
-import {MoreInfo, } from '../components';
+import {MoreInfo, Logo, } from '../components';
 import toast from 'react-hot-toast';
 import { IoSendSharp } from '../utils';
 import Swal from "sweetalert2";
@@ -269,14 +269,20 @@ function GlobalChat() {
 
   return (
     <div
-    className={`${theme?' dark ': ''} bg-chat-page w-dvw h-dvh flex flex-col font-sans text-chat-text`}>
+    className={`${theme?' dark ': ''} bg-chat-page w-full h-dvh flex flex-col font-sans text-chat-text`}>
       <header
-      className={`${sideBarView==='more-info' ? 'filter blur-[2px]' : ''}  bg-chat-header flex flex-col justify-start px-5 py-4`}
+      className={`${sideBarView==='more-info' ? 'filter blur-[2px]' : ''}  bg-chat-header shrink-0 min-w-0 overflow-hidden flex flex-col justify-start px-1 py-4`}
       onClick={openMoreInfo}>
-        <div className={`text-chat-header-text font-bold text-2xl `}>
-          Global Chat
+        <div className={`text-chat-header-text font-bold text-2xl flex items-center gap-1 `}>
+          <Logo
+            title="Global Chat"
+            className="h-10 w-10 text-brand-mark"
+          />
+          <p>
+            Global Chat
+          </p>
         </div>
-      <div className={`w-full h-[40%] text-xs pl-2 text-chat-header-online`}>
+      <div className={`w-full h-[40%] text-xs pl-11 text-chat-header-online`}>
           <p>
             {
               users.length>4
