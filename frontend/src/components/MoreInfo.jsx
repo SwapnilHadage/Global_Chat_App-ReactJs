@@ -1,7 +1,7 @@
 import {useState, useEffect, } from 'react';
 import { useSelector, useDispatch, } from 'react-redux';
 import { changeTheme, clearMessages, reset, } from '../redux/slice';
-import { FaAngleDown, FaAngleUp, MdDeleteForever, GrLogout, MdLightMode, MdDarkMode } from '../assets/reactIcons';
+import { FaAngleDown, FaAngleUp, MdDeleteForever, GrLogout, MdLightMode, MdDarkMode, BsGithub, BsLinkedin } from '../assets/reactIcons';
 import { userSocket } from '../../socket/webSocket';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router';
@@ -184,6 +184,25 @@ function MoreInfo({onClose}) {
               <p>
                 Messages are visible to everyone online.
               </p>
+            </div>
+          </div>
+          
+          {/* About */}
+          <div className={`flex flex-col w-full `}>
+            <p>About: </p>
+            <div className={`p-3 flex gap-2 flex-col`}>
+              <a href='https://github.com/SwapnilHadage'
+                target='blank'
+                className='cursor-pointer p-1'
+                ><BsGithub/>
+              </a>
+              <a href='https://www.linkedin.com/in/swapnil-hadage/'
+                target='blank'
+                className='cursor-pointer p-1'
+                >
+                <BsLinkedin/>
+              </a>
+
             </div>
           </div>
         </div>

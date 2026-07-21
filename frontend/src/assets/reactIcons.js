@@ -4,8 +4,8 @@ import { MdDeleteForever } from "react-icons/md";
 import { GrLogout } from "react-icons/gr";
 import { MdLightMode } from "react-icons/md";
 import { MdDarkMode } from "react-icons/md";
-
-
+import { BsGithub } from "react-icons/bs";
+import { BsLinkedin } from "react-icons/bs";
 
 export {
   FaAngleUp,
@@ -14,7 +14,8 @@ export {
   GrLogout,
   MdLightMode,
   MdDarkMode,
-  
+  BsGithub,
+  BsLinkedin
 
 
 }

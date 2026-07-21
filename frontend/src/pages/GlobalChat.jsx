@@ -258,7 +258,7 @@ function GlobalChat() {
   const bottomRef = useRef(null);
   useEffect(()=>{
     bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
+      behavior: "instant",
     });
   },[messages]);
 
@@ -282,7 +282,7 @@ function GlobalChat() {
             Global Chat
           </p>
         </div>
-      <div className={`w-full h-[40%] text-xs pl-11 text-chat-header-online`}>
+        <div className={`w-full h-[40%] text-xs pl-11 text-chat-header-online`}>
           <p>
             {
               users.length>4
