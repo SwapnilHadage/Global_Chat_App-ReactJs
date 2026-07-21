@@ -300,8 +300,8 @@ function GlobalChat() {
       <main
       className={`${sideBarView==='more-info' ? 'filter blur-[2px]' : ''}  flex-1 p-2 gap-2 overflow-y-auto overflow-x-hidden bg-chat-surface scrollbar-chat flex flex-col min-h-0 ` }>
         <div className='flex flex-col gap-2'>
-            {
-              messages.length &&
+            { messages.length===0?
+              <p></p> :
               messages.map((msg, i)=>
                 msg.type === 'msg' ?(
                 <div

@@ -59,7 +59,7 @@ function Login() {
     setLoginStatus('Joining..');
           userSocket
           .timeout(5000)
-          .emit('joinRoom', userName, (err, response)=>{
+          .emit('joinRoom', userName.trim(), (err, response)=>{
           
             if (err) {
               // Server didn't acknowledge within 5 seconds
